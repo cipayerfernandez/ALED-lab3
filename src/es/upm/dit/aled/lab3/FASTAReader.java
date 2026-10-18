@@ -5,6 +5,7 @@ import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -40,7 +41,7 @@ public class FASTAReader {
 	/*
 	 * Helper method to read from a file. It populates the data array with upper
 	 * case version of all the nucleotids found in the file. Throws an IOException
-	 * if there is a problem accessing the file or the file is to big to fit in an
+	 * if there is a problem accessing the file or the file is too big to fit in an
 	 * array.
 	 */
 	private void readFile(String fileName) throws IOException {
@@ -100,7 +101,7 @@ public class FASTAReader {
 	 * 
 	 * @param initialPos The first character of the sequence.
 	 * @param size       The length of the sequence.
-	 * @return An String representing the sequence.
+	 * @return A String representing the sequence.
 	 */
 	public String getSequence(int initialPos, int size) {
 		if (initialPos + size >= validBytes)
@@ -162,8 +163,18 @@ public class FASTAReader {
 	 *         pattern in the data.
 	 */
 	public List<Integer> search(byte[] pattern) {
-		// TODO
-		return null;
+		List<Integer> positions = new ArrayList<Integer>();	// Creo la lista de posiciones a devolver.
+		for (int i = 0; i < validBytes; i++) {	// Recorro el array de datos (genoma) hasta la posición validBytes.
+			try {
+				if (compare(pattern, i)==true) {	// El método "compare()" devuelve true si "pattern" se encuentra en la posición i de "content".
+					positions.add(i);	// Si es true, añado i a la lista de posiciones.
+				}
+			} catch (FASTAException e) {
+				e.printStackTrace();
+				System.out.println("Se está intentando buscar el patrón más allá de los bytes válidos.");
+				}
+		}
+		return positions;
 	}
 
 	/**
