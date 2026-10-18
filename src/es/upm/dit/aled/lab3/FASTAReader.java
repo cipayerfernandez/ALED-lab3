@@ -136,8 +136,17 @@ public class FASTAReader {
 	 * pattern when one has been found to be different.
 	 */
 	private boolean compareImproved(byte[] pattern, int position) throws FASTAException {
-		// TODO
-		return false;
+		if (position + pattern.length > validBytes) {
+			throw new FASTAException("Pattern goes beyond the end of the file.");
+		}
+		boolean match = true;
+		for (int i = 0; i < pattern.length; i++) {
+			if (pattern[i] != content[position + i]) {
+				match = false;
+				break;
+			}
+		}
+		return match;
 	}
 
 	/*
@@ -166,13 +175,14 @@ public class FASTAReader {
 		List<Integer> positions = new ArrayList<Integer>();	// Creo la lista de posiciones a devolver.
 		for (int i = 0; i < validBytes; i++) {	// Recorro el array de datos (genoma) hasta la posición validBytes.
 			try {
-				if (compare(pattern, i)==true) {	// El método "compare()" devuelve true si "pattern" se encuentra en la posición i de "content".
+				if (compareImproved(pattern, i) == true) {	// El método "compare()" devuelve true si "pattern" se encuentra en la posición i de "content".
 					positions.add(i);	// Si es true, añado i a la lista de posiciones.
 				}
 			} catch (FASTAException e) {
-				e.printStackTrace();
+				//e.printStackTrace();	// Esto, que se genera automáticamente al pulsar "surround with try/catch", es lo que genera mensajes de error rojos en la consola.
 				System.out.println("Se está intentando buscar el patrón más allá de los bytes válidos.");
-				}
+				break;
+			}
 		}
 		return positions;
 	}
