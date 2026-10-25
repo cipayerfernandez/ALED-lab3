@@ -143,7 +143,7 @@ public class FASTAReader {
 		for (int i = 0; i < pattern.length; i++) {
 			if (pattern[i] != content[position + i]) {
 				match = false;
-				break;
+				break;	// El break hace que deje de buscar a partir del primer fallo.
 			}
 		}
 		return match;
@@ -158,8 +158,16 @@ public class FASTAReader {
 	 * ones present in the indicated position.
 	 */
 	private int compareNumErrors(byte[] pattern, int position) throws FASTAException {
-		// TODO
-		return -1;
+		int errors = 0;	// Creo un entero que indique el número de caracteres diferentes entre pattern y content en la posición i.
+		if (position + pattern.length > validBytes) {	// Excepción para no buscar más allá de los bytes válidos.
+			throw new FASTAException("Pattern goes beyond the end of the file.");
+		}
+		for (int i = 0; i < pattern.length; i++) {
+			if (pattern[i] != content[position + i]) {
+				errors++;	// Si content y pattern no coinciden en la posición i, incremento el número de errores.
+			}
+		}
+		return errors;
 	}
 
 	/**
@@ -175,12 +183,12 @@ public class FASTAReader {
 		List<Integer> positions = new ArrayList<Integer>();	// Creo la lista de posiciones a devolver.
 		for (int i = 0; i < validBytes; i++) {	// Recorro el array de datos (genoma) hasta la posición validBytes.
 			try {
-				if (compareImproved(pattern, i) == true) {	// El método "compare()" devuelve true si "pattern" se encuentra en la posición i de "content".
+				if (compareImproved(pattern, i)) {	// El método "compare()" devuelve true si "pattern" se encuentra en la posición i de "content".
 					positions.add(i);	// Si es true, añado i a la lista de posiciones.
 				}
 			} catch (FASTAException e) {
 				//e.printStackTrace();	// Esto, que se genera automáticamente al pulsar "surround with try/catch", es lo que genera mensajes de error rojos en la consola.
-				System.out.println("Se está intentando buscar el patrón más allá de los bytes válidos.");
+				System.out.println("Pattern goes beyond the end of the file.");
 				break;
 			}
 		}
@@ -200,8 +208,18 @@ public class FASTAReader {
 	 *         pattern (with up to 1 errors) in the data.
 	 */
 	public List<Integer> searchSNV(byte[] pattern) {
-		// TODO
-		return null;
+		List<Integer> positions = new ArrayList<Integer>();
+		for (int i = 0; i < validBytes; i++) {
+			try {
+				if (compareNumErrors(pattern, i) < 2) {	// Cuando el número de errores sea menor que 2 (0 o 1), añado la posición.
+					positions.add(i);
+				}
+			} catch (FASTAException e) {
+				System.out.println("Pattern goes beyond the end of the file.");
+				break;
+			}
+		}
+		return positions;
 	}
 
 	public static void main(String[] args) {
@@ -211,7 +229,7 @@ public class FASTAReader {
 			return;
 		System.out.println("Tiempo de apertura de fichero: " + (System.nanoTime() - t1));
 		long t2 = System.nanoTime();
-		List<Integer> posiciones = reader.search(args[1].getBytes());
+		List<Integer> posiciones = reader.searchSNV(args[1].getBytes());
 		System.out.println("Tiempo de búsqueda: " + (System.nanoTime() - t2));
 		if (posiciones.size() > 0) {
 			for (Integer pos : posiciones)
