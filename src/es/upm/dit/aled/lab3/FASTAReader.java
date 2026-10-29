@@ -222,6 +222,9 @@ public class FASTAReader {
 		return positions;
 	}
 
+	
+	// FASTAReader_segment:    2.508.026.900 ns
+	// FASTAReader_complete: 229.053.628.300 ns --> dos órdenes de magnitud más
 	public static void main(String[] args) {
 		long t1 = System.nanoTime();
 		FASTAReader reader = new FASTAReader(args[0]);

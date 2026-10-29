@@ -1,5 +1,6 @@
 package es.upm.dit.aled.lab3.binary;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -78,8 +79,43 @@ public class FASTAReaderSuffixes extends FASTAReader {
 	 */
 	@Override
 	public List<Integer> search(byte[] pattern) {
-		// TODO
-		return null;
+		// CREO LA LISTA DE POSICIONES A DEVOLVER
+		List<Integer> positions = new ArrayList<Integer>(); // Creo la lista de posiciones.
+		
+		// CREO LOS LÍMITES DE BÚSQUEDA
+		int lo = 0;
+		int hi = suffixes.length;
+		boolean found = false;
+		int index = 0;	// Índice que va a iterar en las posiciones de pattern.
+		
+		// ORDENO EL GENOMA
+		this.sort();
+
+		// OBTENGO LA POSICIÓN (ENTERO) DEL SUFIJO EN LA MITAD DEL GENOMA ORDENADO
+		while (((hi - lo) > 1) && !found) {		
+
+			int m = (int) (hi + lo) / 2;
+			int posSuffix = suffixes[m].suffixIndex;	// No me deja castear a int así que hago suffixIndex.
+			
+			/// COMPARO EL GENOMA EN LA POSICIÓN posSuffix + index CON EL PATRÓN EN index
+			if(content[posSuffix + index] == pattern[index]) {
+				index++;
+			}
+			if (index == pattern.length) { 
+				positions.add(posSuffix);
+				found = true;
+				break;
+			}
+			if (content[posSuffix + index] > pattern[index]) {
+				hi = m--;
+				index = 0;
+			}
+			if (content[posSuffix + index] < pattern[index]) {
+				lo = m++;
+				index = 0;
+			}
+		}
+		return positions;
 	}
 
 	public static void main(String[] args) {
