@@ -101,7 +101,7 @@ public class FASTAReaderSuffixes extends FASTAReader {
 			if(content[posSuffix + index] == pattern[index]) {
 				index++;
 			}
-			if (index == pattern.length) { 
+			if (index == pattern.length && (content[posSuffix + index - 1] == pattern[index - 1])) {	// Resto 1 para que no salga "Index 80 out of bounds"
 				positions.add(posSuffix);
 				found = true;
 				break;
